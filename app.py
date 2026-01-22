@@ -2,7 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 
 # এখানে আপনার আসল Gemini API Key বসাবেন
-genai.configure(api_key="YOUR_GEMINI_API_KEY")
+genai.configure(api_key="AIzaSyDENWVUBpXQfNmpTAE8qBt3g_D6-Qb1Oto")
 model = genai.GenerativeModel('gemini-pro')
 
 st.set_page_config(page_title="YT Comment AI", page_icon="🎥")
