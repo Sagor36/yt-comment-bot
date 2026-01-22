@@ -1,60 +1,99 @@
 import streamlit as st
 import google.generativeai as genai
 
-# এখানে আপনার আসল Gemini API Key টি বসান
+# Ekhane apnar Gemini API Key-ti boshan
 API_KEY = "AIzaSyDENWVUBpXQfNmpTAE8qBt3g_D6-Qb1Oto"
 
 genai.configure(api_key=API_KEY)
 
-# সঠিক মডেল খুঁজে বের করার ফাংশন যাতে এরর না আসে
 def get_working_model():
     available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-    # প্রথম পছন্দের মডেল gemini-1.5-flash, না থাকলে অন্যটি নিবে
     if 'models/gemini-1.5-flash' in available_models:
         return genai.GenerativeModel('gemini-1.5-flash')
-    elif 'models/gemini-pro' in available_models:
-        return genai.GenerativeModel('gemini-pro')
-    else:
-        return genai.GenerativeModel(available_models[0])
+    return genai.GenerativeModel('gemini-pro')
 
-st.set_page_config(page_title="YT Feedback AI", page_icon="🎥", layout="wide")
+# Page Layout
+st.set_page_config(page_title="YT Feedback Tool", page_icon="🎥", layout="centered")
 
-st.title("🎥 YouTube Appreciation & Comment Generator")
-st.write("যেকোনো ভাষার ট্রান্সক্রিপ্ট দিন, আমি ভিডিওর বিষয়বস্তু অনুযায়ী প্রশংসা মূলক মেসেজ এবং কমেন্ট লিখে দেব।")
+# Custom CSS for Exclusive Design
+st.markdown("""
+    <style>
+    .main-title {
+        border: 4px solid #FF0000;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        background-color: #f9f9f9;
+        color: #FF0000;
+        font-weight: bold;
+        box-shadow: 0px 4px 15px rgba(255, 0, 0, 0.2);
+    }
+    .dev-border {
+        border: 3px dashed #1E90FF;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #1E90FF;
+        background-color: #f0f8ff;
+    }
+    .whatsapp-btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background-color: #25D366;
+        color: white !important;
+        padding: 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .generate-box {
+        border: 2px solid #333;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# ইনপুট এরিয়া
-transcript = st.text_area("ভিডিওর ট্রান্সক্রিপ্ট এখানে পেস্ট করুন:", height=300)
+# 1. Header (Exclusive Border Title)
+st.markdown('<div class="main-title">🎥 YOUTUBE APPRECIATION & COMMENT GENERATOR</div>', unsafe_allow_html=True)
+st.write("") 
 
-if st.button("Generate Appreciation Content"):
+# Transcript Input
+transcript = st.text_area("Video Transcript Ekhane Paste Korun:", height=200)
+
+# 2. Action Button with Border Design
+st.markdown('<div class="generate-box">', unsafe_allow_html=True)
+if st.button("🚀 GENERATE MESSAGE AND COMMENT"):
     if transcript:
-        with st.status("AI ভিডিওর বিষয়বস্তু বিশ্লেষণ করছে...", expanded=True) as status:
+        with st.status("AI Analyzing...", expanded=False):
             try:
                 model = get_working_model()
-                
-                # প্রম্পটটি আপডেট করা হয়েছে পার্সোনাল মেসেজ এবং কমেন্ট পাওয়ার জন্য
+                # Message length 1.5/2 line-er instruction deya hoyeche
                 prompt = (
-                    "Based on the YouTube transcript provided, act as an appreciative viewer and generate:\n\n"
-                    "1. A PERSONAL APPRECIATION MESSAGE: A warm 3-4 sentence paragraph thanking the creator. "
-                    "Mention specific points from the transcript to make it sound real and thoughtful.\n"
-                    "2. 5 ENGAGING COMMENTS: 5 distinct, polite, and encouraging English comments for the video.\n\n"
-                    "All output must be in English. Keep the tone natural, helpful, and friendly.\n\n"
-                    f"Transcript:\n{transcript}"
+                    "Based on the transcript, generate:\n"
+                    "1. A PERSONAL MESSAGE: Max 2 short sentences (1.5 to 2 lines). Make it extremely appreciative.\n"
+                    "2. 5 SHORT COMMENTS: Engaging and polite English comments.\n"
+                    f"Transcript: {transcript}"
                 )
-                
                 response = model.generate_content(prompt)
-                
-                st.success("✅ আপনার জন্য কন্টেন্ট তৈরি হয়েছে:")
+                st.success("Results Ready!")
                 st.markdown("---")
-                # ফলাফলটি সুন্দরভাবে দেখানোর জন্য
                 st.markdown(response.text)
-                
-                status.update(label="Success! Content Generated.", state="complete", expanded=False)
             except Exception as e:
-                st.error(f"Error occurred: {e}")
-                status.update(label="Failed!", state="error")
+                st.error(f"Error: {e}")
     else:
-        st.warning("দয়া করে আগে ট্রান্সক্রিপ্ট পেস্ট করুন!")
+        st.warning("Please paste a transcript first!")
+st.markdown('</div>', unsafe_allow_html=True)
 
-# ফুটার
-st.markdown("---")
-st.caption("Powered by SAGOR DEVOLOPER | Optimized for Sagor36")
+# 3. Developer Info with Big Border & WhatsApp Button
+st.markdown('<div class="dev-border">Developed By: SAGOR</div>', unsafe_allow_html=True)
+st.markdown('<a href="https://wa.link/kp3qzu" target="_blank" class="whatsapp-btn">💬 Contact Me on WhatsApp</a>', unsafe_allow_html=True)
+
+st.write("")
+st.caption("Powered by SAGOR DEVOLOPER | Fast & Exclusive Edition")
