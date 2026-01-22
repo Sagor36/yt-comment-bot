@@ -3,58 +3,83 @@ import google.generativeai as genai
 
 # এখানে আপনার আসল Gemini API Key বসান
 API_KEY = "AIzaSyDENWVUBpXQfNmpTAE8qBt3g_D6-Qb1Oto"
-
 genai.configure(api_key=API_KEY)
 
 # সঠিক মডেল খুঁজে বের করার ফাংশন
 def get_model():
     models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-    return genai.GenerativeModel(models[0])
+    # gemini-1.5-flash থাকলে সেটা আগে নিবে
+    flash_models = [m for m in models if "flash" in m]
+    return genai.GenerativeModel(flash_models[0] if flash_models else models[0])
 
 # Page Setup
 st.set_page_config(page_title="YT AI Studio", page_icon="🚀", layout="centered")
 
-# Custom Premium CSS
+# Custom UI Design with Animations
 st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+    
     body { background-color: #0e1117; color: white; }
     .stApp { background-color: #0e1117; }
     
     /* exclusive Title Border */
     .exclusive-header {
-        border: 4px double #FF4B4B;
-        padding: 30px;
+        border: 4px solid #FF4B4B;
+        padding: 25px;
         border-radius: 20px;
         text-align: center;
         background: rgba(255, 75, 75, 0.1);
-        font-size: 32px;
+        font-size: 30px;
+        font-weight: bold;
+        color: #FF4B4B;
+        margin-bottom: 25px;
+        box-shadow: 0 0 15px rgba(255, 75, 75, 0.5);
+    }
+
+    /* Input Label Styling */
+    .input-label {
+        font-size: 24px;
+        font-weight: bold;
+        color: #00D2FF;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    /* Action Box Button Animation */
+    div.stButton > button {
+        width: 100%;
+        height: 60px;
+        font-size: 22px !important;
         font-weight: bold;
         color: white;
-        margin-bottom: 30px;
-        box-shadow: 0 0 20px rgba(255, 75, 75, 0.4);
-    }
-
-    /* Action Box */
-    .action-box {
-        border: 2px solid #ffffff33;
-        padding: 20px;
+        background: linear-gradient(90deg, #FF4B4B, #FF8008);
+        border: 2px solid white;
         border-radius: 15px;
-        background: #161b22;
-        margin-top: 20px;
+        transition: 0.4s;
+    }
+    div.stButton > button:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 25px rgba(255, 75, 75, 0.7);
     }
 
-    /* Developed By Border */
+    /* Developed By Animated Section */
+    @keyframes glow {
+        0% { box-shadow: 0 0 5px #1E90FF; border-color: #1E90FF; }
+        50% { box-shadow: 0 0 30px #00D2FF; border-color: #00D2FF; }
+        100% { box-shadow: 0 0 5px #1E90FF; border-color: #1E90FF; }
+    }
     .dev-section {
-        border: 5px solid #1E90FF;
+        border: 6px solid #1E90FF;
         padding: 20px;
-        border-radius: 50px;
+        border-radius: 60px;
         text-align: center;
-        margin-top: 50px;
-        font-size: 35px;
-        font-family: 'Arial Black', sans-serif;
-        color: #1E90FF;
-        background: rgba(30, 144, 255, 0.05);
-        box-shadow: 0 0 15px rgba(30, 144, 255, 0.5);
+        margin-top: 40px;
+        font-size: 38px;
+        font-family: 'Roboto', sans-serif;
+        color: #ffffff;
+        background: rgba(30, 144, 255, 0.15);
+        animation: glow 2s infinite ease-in-out;
     }
 
     /* WhatsApp Button */
@@ -62,67 +87,61 @@ st.markdown("""
         display: block;
         width: 100%;
         text-align: center;
-        background: linear-gradient(90deg, #25D366, #128C7E);
+        background: #25D366;
         color: white !important;
         padding: 15px;
-        border-radius: 30px;
+        border-radius: 40px;
         text-decoration: none;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: bold;
-        margin-top: 20px;
-        transition: 0.3s;
+        margin-top: 25px;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
     }
-    .wa-btn:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4); }
-    
-    /* Success Message Box */
-    .output-card {
-        background: #21262d;
-        border-left: 5px solid #25D366;
-        padding: 15px;
-        border-radius: 10px;
-        margin-top: 20px;
+
+    /* Footer Text */
+    .footer-text {
+        font-size: 18px;
+        color: #888;
+        text-align: center;
+        margin-top: 30px;
+        font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 1. Exclusive Title
+# 1. Title
 st.markdown('<div class="exclusive-header">🎥 YOUTUBE MESSAGE & COMMENT AI</div>', unsafe_allow_html=True)
 
-# Input
-transcript = st.text_area("Paste Video Transcript Below:", height=200, placeholder="Enter transcript here...")
+# 2. Input Label and Area
+st.markdown('<span class="input-label">Paste Video Transcript Below:</span>', unsafe_allow_html=True)
+transcript = st.text_area("", height=200, placeholder="এখানে ট্রান্সক্রিপ্ট পেস্ট করুন...", key="input")
 
-# 2. Generate Button Area
-st.markdown('<div class="action-box">', unsafe_allow_html=True)
-if st.button("✨ GENERATE MESSAGE AND COMMENT"):
+# 3. Generate Message And Comment Button
+if st.button("🚀 GENERATE MESSAGE AND COMMENT"):
     if transcript:
-        with st.spinner('🤖 AI Thinking...'):
+        with st.spinner('🤖 AI Analysis Korche...'):
             try:
                 model = get_model()
-                # Message 1.5/2 lines instruction
+                # 1.5/2 lines appreciation instruction
                 prompt = (
-                    "Based on this YouTube transcript, generate:\n"
-                    "1. APPRECIATION MESSAGE: A warm personal message exactly 1.5 to 2 lines long thanking the creator.\n"
-                    "2. 5 COMMENTS: Polite English comments for the video.\n"
+                    "Using the following transcript, create:\n"
+                    "1. A PERSONAL MESSAGE: One very warm appreciation message exactly 1.5 to 2 lines long.\n"
+                    "2. 5 COMMENTS: Five short, polite English comments.\n"
                     f"Transcript: {transcript}"
                 )
                 response = model.generate_content(prompt)
-                
-                st.markdown('<div class="output-card">', unsafe_allow_html=True)
-                st.subheader("✅ Your Content Ready:")
+                st.markdown("### ✅ Result:")
                 st.write(response.text)
-                st.markdown('</div>', unsafe_allow_html=True)
-                
             except Exception as e:
-                st.error(f"Error: {e}. Please check your API Key.")
+                st.error(f"Error: {e}. Please ensure your API Key is correct.")
     else:
         st.warning("Please paste a transcript first!")
-st.markdown('</div>', unsafe_allow_html=True)
 
-# 3. Developer Info with Large Border
+# 4. Developed By Section (Animated)
 st.markdown('<div class="dev-section">Developed By: SAGOR</div>', unsafe_allow_html=True)
 
-# WhatsApp Button
+# 5. WhatsApp Button
 st.markdown('<a href="https://wa.link/kp3qzu" target="_blank" class="wa-btn">💬 Contact Me on WhatsApp</a>', unsafe_allow_html=True)
 
-st.write("")
-st.caption("Premium Edition | v2.0 | Advanced Content Generator")
+# 6. Large Footer
+st.markdown('<div class="footer-text">Premium Edition | v2.0 | Advanced Content Generator</div>', unsafe_allow_html=True)
