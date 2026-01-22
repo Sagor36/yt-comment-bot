@@ -6,46 +6,49 @@ API_KEY = "AIzaSyDENWVUBpXQfNmpTAE8qBt3g_D6-Qb1Oto"
 
 genai.configure(api_key=API_KEY)
 
-# সঠিক এবং এভেইলঅ্যাবল মডেল খুঁজে বের করার ফাংশন
-def get_model():
-    try:
-        # gemini-1.5-flash সবচেয়ে দ্রুত এবং মেসেজ তৈরিতে ভালো
+# সঠিক মডেল খুঁজে বের করার ফাংশন যাতে এরর না আসে
+def get_working_model():
+    available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+    # প্রথম পছন্দের মডেল gemini-1.5-flash, না থাকলে অন্যটি নিবে
+    if 'models/gemini-1.5-flash' in available_models:
         return genai.GenerativeModel('gemini-1.5-flash')
-    except:
+    elif 'models/gemini-pro' in available_models:
         return genai.GenerativeModel('gemini-pro')
+    else:
+        return genai.GenerativeModel(available_models[0])
 
 st.set_page_config(page_title="YT Feedback AI", page_icon="🎥", layout="wide")
 
-st.title("🎥 YouTube Appreciation Message & Comment Generator")
-st.write("যেকোনো ভাষার ট্রান্সক্রিপ্ট দিন, আমি ভিডিওর বিষয়বস্তু অনুযায়ী সুন্দর ইংরেজি মেসেজ এবং কমেন্ট লিখে দেব।")
+st.title("🎥 YouTube Appreciation & Comment Generator")
+st.write("যেকোনো ভাষার ট্রান্সক্রিপ্ট দিন, আমি ভিডিওর বিষয়বস্তু অনুযায়ী প্রশংসা মূলক মেসেজ এবং কমেন্ট লিখে দেব।")
 
-# ইনপুট সেকশন
+# ইনপুট এরিয়া
 transcript = st.text_area("ভিডিওর ট্রান্সক্রিপ্ট এখানে পেস্ট করুন:", height=300)
 
-if st.button("Generate Appreciation Feedback"):
+if st.button("Generate Appreciation Content"):
     if transcript:
         with st.status("AI ভিডিওর বিষয়বস্তু বিশ্লেষণ করছে...", expanded=True) as status:
             try:
-                model = get_model()
+                model = get_working_model()
                 
-                # প্রম্পটটি আপডেট করা হয়েছে যাতে মেসেজ এবং কমেন্ট আলাদাভাবে দেয়
+                # প্রম্পটটি আপডেট করা হয়েছে পার্সোনাল মেসেজ এবং কমেন্ট পাওয়ার জন্য
                 prompt = (
-                    "Act as a regular YouTube viewer who just watched a video. "
-                    "Based on the transcript provided, generate two things in English:\n\n"
-                    "1. A PERSONAL APPRECIATION MESSAGE: Write a warm, 3-4 sentence message thanking the creator "
-                    "for specific value they provided in this video (based on the transcript).\n"
-                    "2. 5 SHORT COMMENTS: Write 5 distinct, polite, and engaging YouTube comments.\n\n"
-                    "Ensure the tone is natural, human-like, and very encouraging.\n\n"
+                    "Based on the YouTube transcript provided, act as an appreciative viewer and generate:\n\n"
+                    "1. A PERSONAL APPRECIATION MESSAGE: A warm 3-4 sentence paragraph thanking the creator. "
+                    "Mention specific points from the transcript to make it sound real and thoughtful.\n"
+                    "2. 5 ENGAGING COMMENTS: 5 distinct, polite, and encouraging English comments for the video.\n\n"
+                    "All output must be in English. Keep the tone natural, helpful, and friendly.\n\n"
                     f"Transcript:\n{transcript}"
                 )
                 
                 response = model.generate_content(prompt)
                 
-                st.success("✅ আপনার জন্য ফিডব্যাক তৈরি হয়েছে:")
+                st.success("✅ আপনার জন্য কন্টেন্ট তৈরি হয়েছে:")
                 st.markdown("---")
-                st.write(response.text)
+                # ফলাফলটি সুন্দরভাবে দেখানোর জন্য
+                st.markdown(response.text)
                 
-                status.update(label="Success! Feedback generated.", state="complete", expanded=False)
+                status.update(label="Success! Content Generated.", state="complete", expanded=False)
             except Exception as e:
                 st.error(f"Error occurred: {e}")
                 status.update(label="Failed!", state="error")
@@ -54,4 +57,4 @@ if st.button("Generate Appreciation Feedback"):
 
 # ফুটার
 st.markdown("---")
-st.caption("Powered by Sagor Devoloper | Designed for Sagor36")
+st.caption("Powered by SAGOR DEVOLOPER | Optimized for Sagor36")
