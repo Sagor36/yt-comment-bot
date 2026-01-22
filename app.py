@@ -1,11 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
+import time
 
 # এখানে আপনার আসল Gemini API Key বসান
 API_KEY = "AIzaSyDENWVUBpXQfNmpTAE8qBt3g_D6-Qb1Oto"
 genai.configure(api_key=API_KEY)
 
-# সঠিক মডেল খুঁজে বের করার ফাংশন যাতে এরর না আসে
+# সঠিক মডেল খুঁজে বের করার ফাংশন
 def get_model():
     try:
         models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
@@ -15,176 +16,175 @@ def get_model():
         return genai.GenerativeModel('gemini-1.5-flash')
 
 # Page Setup
-st.set_page_config(page_title="YT AI Studio Pro", page_icon="🚀", layout="centered")
+st.set_page_config(page_title="SAGOR AI STUDIO", page_icon="🚀", layout="centered")
 
-# Custom UI Design with Premium Styling
+# Custom UI Design with High Contrast Colors
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Orbitron:wght@700&display=swap');
     
-    body { background-color: #0e1117; font-family: 'Poppins', sans-serif; }
-    .stApp { background-color: #0e1117; }
+    body { background-color: #050a14; color: white; }
+    .stApp { background-color: #050a14; }
     
-    /* exclusive Title Border */
+    /* 1. Exclusive Header Border */
     .exclusive-header {
-        border: 4px solid #FF3131;
-        padding: 25px;
-        border-radius: 20px;
+        border: 6px solid #FF0000;
+        padding: 30px;
+        border-radius: 25px;
         text-align: center;
-        background: rgba(255, 49, 49, 0.1);
-        font-size: 32px;
-        font-weight: bold;
-        color: #FF3131;
+        background: rgba(255, 0, 0, 0.15);
+        font-size: 35px;
+        font-family: 'Orbitron', sans-serif;
+        color: #FFFFFF;
         margin-bottom: 30px;
-        box-shadow: 0 0 25px rgba(255, 49, 49, 0.4);
-        text-transform: uppercase;
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+        text-shadow: 2px 2px 5px #000;
     }
 
-    /* Large Input Label */
+    /* 2. Large Input Label */
     .input-label {
-        font-size: 26px;
+        font-size: 28px;
         font-weight: bold;
-        color: #00FFCC; /* উজ্জ্বল নিওন কালার */
+        color: #00FFCC;
         margin-bottom: 15px;
         display: block;
-        text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        text-align: center;
+        text-shadow: 0 0 10px #00FFCC;
     }
 
-    /* Action Button Styling */
+    /* 3. Action Button Customization */
     div.stButton > button {
         width: 100%;
-        height: 70px;
-        font-size: 24px !important;
-        font-weight: bold;
+        height: 80px;
+        font-size: 26px !important;
+        font-weight: 800;
         color: white;
-        background: linear-gradient(90deg, #FF3131, #FF914D);
-        border: 2px solid #ffffff;
-        border-radius: 15px;
-        transition: 0.5s;
+        background: linear-gradient(90deg, #FF0000, #FF5F6D);
+        border: 4px solid #FFFFFF;
+        border-radius: 20px;
         text-transform: uppercase;
-    }
-    div.stButton > button:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(255, 49, 49, 0.6);
+        box-shadow: 0 10px 20px rgba(255, 0, 0, 0.4);
     }
 
-    /* Result Section with Neon Border */
+    /* 4. Result Card with Strong Border & Bold Text */
     .result-card {
-        border: 3px solid #00FFCC;
-        padding: 25px;
-        border-radius: 15px;
-        background: rgba(0, 255, 204, 0.05);
-        margin-top: 30px;
-        box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
-        color: #ffffff;
-        animation: fadeIn 1.5s ease-in-out;
+        border: 5px solid #00FF00;
+        padding: 30px;
+        border-radius: 20px;
+        background: #000000;
+        margin-top: 35px;
+        box-shadow: 0 0 35px rgba(0, 255, 0, 0.4);
+        animation: slideIn 1s ease-out;
     }
-    .result-title {
-        color: #00FFCC;
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
+    .result-content {
+        font-size: 22px;
+        font-weight: 700;
+        color: #FFFFFF;
+        line-height: 1.5;
     }
+    .result-content b { color: #00FFCC; font-size: 24px; }
 
-    /* Developed By Animated Glow Section */
+    /* 5. Developed By Glow Animation */
     @keyframes glow-blue {
-        0% { box-shadow: 0 0 10px #00B4DB; border-color: #00B4DB; }
-        50% { box-shadow: 0 0 40px #00FBFF; border-color: #00FBFF; }
-        100% { box-shadow: 0 0 10px #00B4DB; border-color: #00B4DB; }
+        0% { box-shadow: 0 0 15px #00D2FF; border-color: #00D2FF; }
+        50% { box-shadow: 0 0 50px #00FFFF; border-color: #00FFFF; }
+        100% { box-shadow: 0 0 15px #00D2FF; border-color: #00D2FF; }
     }
     .dev-section {
-        border: 6px solid #00B4DB;
+        border: 8px solid #00D2FF;
         padding: 25px;
-        border-radius: 60px;
+        border-radius: 80px;
         text-align: center;
-        margin-top: 50px;
-        font-size: 40px;
-        font-weight: 800;
-        color: #ffffff;
-        background: rgba(0, 180, 219, 0.1);
-        animation: glow-blue 2.5s infinite ease-in-out;
-        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        margin-top: 60px;
+        font-size: 45px;
+        font-weight: 900;
+        color: #FFFFFF;
+        background: rgba(0, 210, 255, 0.2);
+        animation: glow-blue 2s infinite ease-in-out;
+        font-family: 'Orbitron', sans-serif;
     }
 
-    /* WhatsApp Gradient Button */
+    /* 6. WhatsApp Button */
     .wa-btn {
         display: block;
         width: 100%;
         text-align: center;
-        background: linear-gradient(90deg, #25D366, #128C7E);
+        background: linear-gradient(90deg, #25D366, #075E54);
         color: white !important;
-        padding: 18px;
-        border-radius: 50px;
+        padding: 22px;
+        border-radius: 60px;
         text-decoration: none;
-        font-size: 24px;
+        font-size: 26px;
         font-weight: bold;
-        margin-top: 30px;
-        transition: 0.3s;
-        box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4);
-    }
-    .wa-btn:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6); }
-
-    /* Bottom Info Text */
-    .version-text {
-        font-size: 20px;
-        color: #555;
-        text-align: center;
         margin-top: 40px;
-        font-weight: bold;
-        letter-spacing: 1px;
+        box-shadow: 0 10px 25px rgba(37, 211, 102, 0.5);
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+    /* Loading Message Styling */
+    .loading-text {
+        font-size: 24px;
+        color: #FFD700;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
+        text-shadow: 0 0 10px #FFD700;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 1. Exclusive Header
-st.markdown('<div class="exclusive-header">🎥 YOUTUBE MESSAGE & COMMENT AI</div>', unsafe_allow_html=True)
+# Main Title
+st.markdown('<div class="exclusive-header">🚀 SAGOR AI CONTENT STUDIO</div>', unsafe_allow_html=True)
 
-# 2. Input Label & Text Area
+# Input
 st.markdown('<span class="input-label">Paste Video Transcript Below:</span>', unsafe_allow_html=True)
-transcript = st.text_area("", height=220, placeholder="ভিডিওর ট্রান্সক্রিপ্ট এখানে পেস্ট করুন...", key="main_input")
+transcript = st.text_area("", height=250, placeholder="Paste here...", key="input_area")
 
-# 3. Action Button
+# Generate Button
 if st.button("🚀 GENERATE MESSAGE AND COMMENT"):
     if transcript:
-        with st.spinner('🤖 AI বিশ্লেষণ করছে...'):
-            try:
-                model = get_model()
-                # Prompt for short message and comments
-                prompt = (
-                    "Using the following transcript, create:\n"
-                    "1. A PERSONAL MESSAGE: One warm appreciation message strictly 1.5 to 2 lines long in English.\n"
-                    "2. 5 COMMENTS: Five short, polite English comments.\n"
-                    f"Transcript: {transcript}"
-                )
-                response = model.generate_content(prompt)
-                
-                # Result with Neon Border
-                st.markdown(f"""
-                <div class="result-card">
-                    <div class="result-title">✅ Generated Content:</div>
-                    <div style="font-size: 18px; line-height: 1.6; color: #E0E0E0; font-weight: 500;">
-                        {response.text.replace('**', '<b>').replace('\n', '<br>')}
-                    </div>
+        # Loading message as requested
+        loading_placeholder = st.empty()
+        loading_placeholder.markdown('<div class="loading-text">⏳ SAGOR WEB WORKING PLEASE WAIT FEW SEC...</div>', unsafe_allow_html=True)
+        
+        try:
+            model = get_model()
+            prompt = (
+                "Transcript analysis request:\n"
+                "1. Personal appreciation message (exactly 1.5 to 2 lines long).\n"
+                "2. 5 short, creative YouTube comments in English.\n"
+                f"Transcript: {transcript}"
+            )
+            response = model.generate_content(prompt)
+            
+            # Remove loading text and show result
+            loading_placeholder.empty()
+            
+            st.markdown(f"""
+            <div class="result-card">
+                <div style="color: #00FF00; font-size: 28px; font-weight: bold; margin-bottom: 20px;">✅ SUCCESS! YOUR CONTENT:</div>
+                <div class="result-content">
+                    {response.text.replace('**', '<b>').replace('\n', '<br>')}
                 </div>
-                """, unsafe_allow_html=True)
-                
-            except Exception as e:
-                st.error(f"Error: {e}")
+            </div>
+            """, unsafe_allow_html=True)
+            
+        except Exception as e:
+            loading_placeholder.empty()
+            st.error(f"Something went wrong! Error: {e}")
     else:
-        st.warning("আগে ট্রান্সক্রিপ্ট পেস্ট করুন!")
+        st.warning("Please paste a transcript first!")
 
-# 4. Animated Developer Section
+# Developer Info
 st.markdown('<div class="dev-section">Developed By: SAGOR</div>', unsafe_allow_html=True)
 
-# 5. WhatsApp Button
-st.markdown('<a href="https://wa.link/kp3qzu" target="_blank" class="wa-btn">💬 Contact Me on WhatsApp</a>', unsafe_allow_html=True)
+# Contact Button
+st.markdown('<a href="https://wa.link/kp3qzu" target="_blank" class="wa-btn">💬 CHAT ON WHATSAPP</a>', unsafe_allow_html=True)
 
-# 6. Large Styled Footer
-st.markdown('<div class="version-text">PREMIUM EDITION | V2.0 | ADVANCED AI ENGINE</div>', unsafe_allow_html=True)
+# Large Footer Version
+st.write("")
+st.markdown('<div style="text-align:center; color:#555; font-size:22px; font-weight:bold; margin-top:50px;">PREMIUM V3.0 | 2026 ADVANCED EDITION</div>', unsafe_allow_html=True)
