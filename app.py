@@ -3,7 +3,7 @@ import google.generativeai as genai
 import time
 
 # এখানে আপনার আসল Gemini API Key বসান
-API_KEY = "AIzaSyDENWVUBpXQfNmpTAE8qBt3g_D6-Qb1Oto"
+API_KEY = "AIzaSyCFBexmiVj1MIs6wL1Yih4VtlF2YXcJ7vo"
 genai.configure(api_key=API_KEY)
 
 # সঠিক মডেল খুঁজে বের করার ফাংশন
